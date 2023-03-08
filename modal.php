@@ -22,6 +22,10 @@
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
+
+    $sql = "SELECT certCode, name, course, duration, dateStrt, dateEnd, image FROM certificates";
+    $result = $conn->query($sql);
+
     if(isset($_POST['submit'])){
     // Get form data
         $certCode = $_POST['certCode'];
@@ -36,81 +40,49 @@
         $uploadOk = true;
         $error_message = "";
 
-        if($dateEnd > $dateStrt) {
-            echo "End date is greater than start date.";
-        } else {
-            echo "Start date is greater than or equal to end date.";
-        
+            if(file_exists($target_file)) {
+                $error_message .= "Sorry, File already exists. ";
+                $uploadOk = false;
+            }
 
-        if(file_exists($target_file)) {
-            $error_message .= "Sorry, File already exists. ";
-            $uploadOk = false;
-        }
+            if($_FILES['image']['size'] > 6000000) {
+                $error_message = "Sorry, your file is to large. ";
+                echo '<script>$(document).ready(function(){$("#error-message").html("' . $error_message . '");$("#myModal").modal("show");});</script>';
+                $uploadOk = false;
+            }
 
-        if($_FILES['image']['size'] > 6000000) {
-            $error_message = "Sorry, your file is to large. ";
-            echo '<script>$(document).ready(function(){$("#error-message").html("' . $error_message . '");$("#myModal").modal("show");});</script>';
-            $uploadOk = false;
-        }
+            $allowedTypes = array('jpg');
+            $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedTypes)) {
+                $error_message = "Only PDF files are allowed.";
+                echo '<script>$(document).ready(function(){$("#error-message").html("' . $error_message . '");$("#myModal").modal("show");});</script>';
+                $uploadOk = false;
+            }
 
-        $allowedTypes = array('pdf');
-        $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowedTypes)) {
-            $error_message = "Only PDF files are allowed.";
-            echo '<script>$(document).ready(function(){$("#error-message").html("' . $error_message . '");$("#myModal").modal("show");});</script>';
-            $uploadOk = false;
-        }
+            if ($uploadOk == false) {
+                $error_message = "Your file is not uploaded. ";
+                echo "<script>
+                        $('#uploadErrorMessage').text('$error_message');
+                        $('#uploadErrorModal').modal('show');
+                    </script>";
+            } elseif(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+                $sql = "INSERT INTO certificates (certCode, name, course, duration, dateStrt, dateEnd, image) 
+                VALUES ('$certCode', '$name', '$course', '$duration', '$dateStrt', '$dateEnd', '$target_file')";
 
-        if ($uploadOk == false) {
-            $error_message = "Your file is not uploaded. ";
-            echo "<script>
-                    $('#uploadErrorMessage').text('$error_message');
-                    $('#uploadErrorModal').modal('show');
-                  </script>";
-        } elseif(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            $sql = "INSERT INTO certificates (certCode, name, course, duration, dateStrt, dateEnd, image) 
-            VALUES ('$certCode', '$name', '$course', '$duration', '$dateStrt', '$dateEnd', '$target_file')";
-
-            if ($conn->query($sql) === TRUE) {
-            // Success modal
-            echo '
-            <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="successModalLabel">Success!</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Certificate has been created successfully.</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>';
-        
-            echo '<script>
-                    $(document).ready(function() {
-                        $("#successModal").modal("show");
-                    });
-                  </script>';
-            } else {
+                if ($conn->query($sql) === TRUE) {
+                // Success modal
                 echo '
-                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel">
+                <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title" id="errorModalLabel">Error!</h4>
+                                <h4 class="modal-title" id="successModalLabel">Success!</h4>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <p>Error: ' . $sql . '<br>' . $conn->error . '</p>
+                                <p>Certificate has been created successfully.</p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -121,13 +93,39 @@
             
                 echo '<script>
                         $(document).ready(function() {
-                            $("#errorModal").modal("show");
+                            $("#successModal").modal("show");
                         });
-                      </script>';
+                    </script>';
+                } else {
+                    echo '
+                    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="errorModalLabel">Error!</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Error: ' . $sql . '<br>' . $conn->error . '</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>';
+                
+                    echo '<script>
+                            $(document).ready(function() {
+                                $("#errorModal").modal("show");
+                            });
+                        </script>';
+                }
             }
-        }
+        
     }
-}
 
     // Close database connection
     $conn->close();
@@ -145,48 +143,81 @@
         <div class="modal-header">
             <h5 class="modal-title" id="certificateModalLabel">Create Certificate</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+                <span aria-hidden="true">&times;</span>
             </button>
         </div>
+
         <div class="modal-body">
-           <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="certCode">Certificate Code:</label>
-                <input type="text" class="form-control" id="certCode" name="certCode" value="<?php echo generateCertCode(); ?>" readonly> <br>
-            </div>
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" class="form-control" id="name" name="name" requried> <br>
-            </div>
-            <div class="form-group">
-                <label for="course">Course:</label>
-                <input type="text" class="form-control" id="course" name="course" required> <br>
-            </div>
-            <div class="form-group">
-                <label for="duration">Duration:</label>
-                <input type="text" class="form-control" id="duration" name="duration" required> <br>
-            </div>
-            <div class="form-group">
-                <label for="dateStrt">Date Started:</label>
-                <input type="date" class="form-control" id="dateStrt" name="dateStrt" required> <br>
-            </div>
-            <div class="form-group">
-                <label for="dateEnd">Date Ended:</label>
-                <input type="date" class="form-control" id="dateEnd" name="dateEnd" required> <br>
-            </div>
-            <div class="form-group">
-                <label for="image">Certificate:</label>
-                <input type="file" class="form-control" id="image" name="image">
-            </div>
-            <div class="modal-footer">
-             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button><br>
-             <button class="btn btn-primary btn-block" type="submit" name="submit">Create</button> <br>
-            </div>
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="certCode">Certificate Code:</label>
+                    <input type="text" class="form-control" id="certCode" name="certCode" value="<?php echo generateCertCode(); ?>" readonly> <br>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" requried> <br>
+                </div>
+                <div class="form-group">
+                    <label for="course">Course:</label>
+                    <input type="text" class="form-control" id="course" name="course" required> <br>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration:</label>
+                    <input type="text" class="form-control" id="duration" name="duration" required> <br>
+                </div>
+                <div class="form-group">
+                    <label for="dateStrt">Date Started:</label>
+                    <input type="date" class="form-control" id="dateStrt" name="dateStrt" required> <br>
+                </div>
+                <div class="form-group">
+                    <label for="dateEnd">Date Ended:</label>
+                    <input type="date" class="form-control" id="dateEnd" name="dateEnd" required> <br>
+                </div>
+                <div class="form-group">
+                    <label for="image">Certificate:</label>
+                    <input type="file" class="form-control" id="image" name="image">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Cancel</button><br>
+                    <button class="btn btn-primary btn-block" type="submit" name="submit">Create</button>
+                </div>
             </form>
         </div>
-        </div>
+
+        </div> 
     </div>
     </div>
+
+    <table>
+        <tr>
+            <th>Certificate Code</th>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Duration</th>
+            <th>Date Started</th>
+            <th>Date Ended</th>
+            <th>Certificate</th>
+        </tr>
+        <?php
+        if($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                echo "<tr>
+                    <td>" . $row["certCode"]. "</td>
+                    <td>" . $row["name"]. "</td>
+                    <td>" . $row["course"]. "</td>
+                    <td>" . $row["duration"]. " Hours</td>
+                    <td>" . $row["dateStrt"]. "</td>
+                    <td>" . $row["dateEnd"]. "</td>
+                    <td><a href='" . $row["image"] . "' target='_blank'><img src='" . $row["image"] . "' alt='image' width='20' height='20'></a></td>
+                </tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "0 results";
+        }
+        ?>
+    </table>
+
     <!-- Check file size Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -233,7 +264,6 @@
         </div>
     </div>
     </div>
-    </body>
 </body>
 <?php
 function generateCertCode() {
