@@ -15,6 +15,7 @@ table {
     border-collapse: collapse;
     border: 2px solid black;
     width: 100%;
+    z-index: -1;
 }
 
 td, th {
@@ -26,8 +27,3 @@ tr:not(:first-child) {
     border-top: 1px solid lightgray;
 }
 
-.pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
