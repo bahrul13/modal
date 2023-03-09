@@ -1,27 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" type="text/css" href="styles.css" /> 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    
-    <title> Certificate </title>
-</head>
-<body>
-
-    <?php
+<?php
     // Connect to database
     $servername = "localhost";
     $username = "root";
     $password = "";
     $dbname = "modal";
     $conn = new mysqli($servername, $username, $password, $dbname);
+    // $results_per_page = 2;
 
     // Check connection
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
+
+    // $sql = "SELECT COUNT(*) as total FROM certificates";
+    // $result = $conn->query($sql);
+    // $row = $result->fetch_assoc();
+    // $total_records = $row["total"];
+
+    // // Calculate total number of pages
+    // $total_pages = ceil($total_records / $results_per_page);
+
+    // // Get current page number
+    // $current_page = isset($_GET["page"]) ? $_GET["page"] : 1;
+
+    // // Calculate the starting record for the current page
+    // $start_from = ($current_page - 1) * $results_per_page;
 
     $sql = "SELECT certCode, name, course, duration, dateStrt, dateEnd, image FROM certificates";
     $result = $conn->query($sql);
@@ -129,8 +132,29 @@
 
     // Close database connection
     $conn->close();
-    ?>
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css" /> 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
 
+        $(document).ready(function () {
+            $('#dtBasicExample').DataTable();
+            $('.dataTables_length').addClass('bs-select');
+            $('#dtBasicExample_filter input[type="search"]').attr('placeholder','Search by Name');
+        });
+    </script>
+   
+    <title> Certificate </title>
+</head>
+<body>
     <!-- Button to trigger the modal -->
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#certificateModal">
     Create Certificate
@@ -188,16 +212,18 @@
     </div>
     </div>
 
-    <table>
-        <tr>
-            <th>Certificate Code</th>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Duration</th>
-            <th>Date Started</th>
-            <th>Date Ended</th>
-            <th>Certificate</th>
-        </tr>
+    <table id="dtBasicExample" class="table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th class="th-sm">Certificate Code</th>
+                <th class="th-sm">Name</th>
+                <th class="th-sm">Course</th>
+                <th class="th-sm">Duration</th>
+                <th class="th-sm">Date Started</th>
+                <th class="th-sm">Date Ended</th>
+                <th class="th-sm">Certificate</th>
+            </tr>
+        </thead><tbody>   
         <?php
         if($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
@@ -215,7 +241,30 @@
         } else {
             echo "0 results";
         }
+
+        // // Display pagination links
+        // echo "<div class='pagination'>";
+        // for ($i = 1; $i <= $total_pages; $i++) {
+        //     if ($i == $current_page) {
+        //         echo "<span class='current-page'>$i</span>";
+        //     } else {
+        //         echo "<a href='?page=$i' style='font-weight: bold; color: black;'>$i</a>";
+        //     }
+        // }
+        // echo "</div>";
         ?>
+        </tbody>
+        <tfoot>
+              <tr>
+                <th class="th-sm">Certificate Code</th>
+                <th class="th-sm">Name</th>
+                <th class="th-sm">Course</th>
+                <th class="th-sm">Duration</th>
+                <th class="th-sm">Date Started</th>
+                <th class="th-sm">Date Ended</th>
+                <th class="th-sm">Certificate</th>
+              </tr>
+        </tfoot>
     </table>
 
     <!-- Check file size Modal -->
@@ -276,8 +325,4 @@ function generateCertCode() {
     return $randomString;
 }
 ?>
-<script>
- 
-</script>
-
 </html>
