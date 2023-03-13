@@ -27,3 +27,6 @@ tr:not(:first-child) {
     border-top: 1px solid lightgray;
 }
 
+#create_btn{
+    float: right;
+}

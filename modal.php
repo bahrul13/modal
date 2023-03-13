@@ -1,29 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-
+    <link rel="stylesheet" type="text/css" href="style.css"/>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
-        
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>     
+    <style>
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting:before,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_asc:before,
+        table.dataTable thead .sorting_asc_disabled:after,
+        table.dataTable thead .sorting_asc_disabled:before,
+        table.dataTable thead .sorting_desc:after,
+        table.dataTable thead .sorting_desc:before,
+        table.dataTable thead .sorting_desc_disabled:after,
+        table.dataTable thead .sorting_desc_disabled:before {
+            bottom: .5em;
+        }
+        #create_btn{
+            float: right;
+            margin: 12px;
+        }
+        table {
+            border-collapse: collapse;
+            border: 2px solid black;
+            width: 100%;
+            z-index: -1;
+        }
+        td, th {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        tr:not(:first-child) {
+            border-top: 1px solid lightgray;
+        }
+    </style>
         
         
         
-        
-        <script>
-            $(document).ready(function () {
-            $('#dtBasicExample').DataTable();
-            $('.dataTables_length').addClass('bs-select');
-            $('#dtBasicExample_filter input[type="search"]').attr('placeholder','Search by Code or Name ');
-            });
+    <script>
+        $(document).ready(function () {
+        $('#dtBasicExample').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+        $('#dtBasicExample_filter input[type="search"]').attr('placeholder','Search by Code or Name ');
+        });
             
-        </script>
+    </script>
        
-        <title>Tables</title>
+    <title>Tables</title>
     </head>
 
 <?php
@@ -151,13 +178,13 @@
 <body>
     
     <!-- Button to trigger the modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#certificateModal">
+    <button type="button" id="create_btn" class="btn btn-primary" data-toggle="modal" data-target="#certificateModal">
     Create Certificate
     </button>
 
     <!-- Modal -->
     <div class="modal fade" id="certificateModal" tabindex="-1" role="dialog" aria-labelledby="certificateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title" id="certificateModalLabel">Create Certificate</h5>
@@ -230,7 +257,7 @@
                                 <td>" . $row["duration"]. " Hours</td>
                                 <td>" . $row["dateStrt"]. "</td>
                                 <td>" . $row["dateEnd"]. "</td>
-                                <td><button type='button' class='btn btn-primary' data-toggle='modal' data-target='#exampleModal' data-img='".$row["image"]."'>View Image</button></td>
+                                <td><button type='button' class='btn btn-primary' data-toggle='modal' data-target='#exampleModal' data-img='".$row["image"]."'>View Certificate</button></td>
                             </tr>";
                 }
                 echo "</table>";
@@ -243,17 +270,17 @@
     </table>
             <!-- Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Image Preview</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Certificate View</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <iframe id="image-preview" name ="image-preview" src="" alt="image" width="100%" height="500px"></iframe>
-              
+                    <iframe id="image-preview" name ="image-preview" src="" alt="image" width="100%" height="500px"></iframe> 
+                    <button type="button" class="btn btn-primary btn-block" data-dismiss="modal">Back</button>
                 </div>
             </div>
         </div>
@@ -307,13 +334,13 @@
    
 </body>
 <script>
-            $('#exampleModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget) // Button that triggered the modal
-            var imgSrc = button.data('img') // Extract info from data-* attributes
-            var modalImg = $('#image-preview')
-            modalImg.attr('src', imgSrc);
-            });
-        </script>
+    $('#exampleModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    var imgSrc = button.data('img') // Extract info from data-* attributes
+    var modalImg = $('#image-preview')
+    modalImg.attr('src', imgSrc);
+    });
+</script>
 <?php
 function generateCertCode() {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
