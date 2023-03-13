@@ -9,7 +9,6 @@
     <link rel="stylesheet" type="text/css" href="style.css"/>
         
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>     
         
         
@@ -19,9 +18,11 @@
             $(document).ready(function () {
             $('#dtBasicExample').DataTable();
             $('.dataTables_length').addClass('bs-select');
-            $('#dtBasicExample_filter input[type="search"]').attr('placeholder','Search by Name or Email');
+            $('#dtBasicExample_filter input[type="search"]').attr('placeholder','Search by Code or Name ');
             });
+            
         </script>
+       
         <title>Tables</title>
     </head>
 
@@ -67,7 +68,7 @@
                 $uploadOk = false;
             }
 
-            $allowedTypes = array('pdf');
+            $allowedTypes = array('jpg');
             $ext = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
             if (!in_array($ext, $allowedTypes)) {
                 $error_message = "Only PDF files are allowed.";
@@ -204,6 +205,8 @@
         </div> 
     </div>
     </div>
+  <!---New modal for Viewing --->
+    
     <table id="dtBasicExample" class="table table-striped table-bordered table-sm" tabindex="-2" cellspacing="0" width="100%">
         <thead>
             <tr>
@@ -215,29 +218,46 @@
                 <th class="th-sm">Date Ended</th>
                 <th class="th-sm">Certificate</th>
             </tr>
-        </thead><tbody>   
-        <?php
-        if($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                echo "<tr>
-                    <td>" . $row["certCode"]. "</td>
-                    <td>" . $row["name"]. "</td>
-                    <td>" . $row["course"]. "</td>
-                    <td>" . $row["duration"]. " Hours</td>
-                    <td>" . $row["dateStrt"]. "</td>
-                    <td>" . $row["dateEnd"]. "</td>
-                    <td><a href='" . $row["image"] . "' target='_blank'><img src='" . $row["image"] . "' alt='image' width='20' height='20'></a></td>
-                </tr>";
+        </thead>
+        <tbody>   
+            <?php
+            if($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                            echo "<tr>
+                                <td>" . $row["certCode"]. "</td>
+                                <td>" . $row["name"]. "</td>
+                                <td>" . $row["course"]. "</td>
+                                <td>" . $row["duration"]. " Hours</td>
+                                <td>" . $row["dateStrt"]. "</td>
+                                <td>" . $row["dateEnd"]. "</td>
+                                <td><button type='button' class='btn btn-primary' data-toggle='modal' data-target='#exampleModal' data-img='".$row["image"]."'>View Image</button></td>
+                            </tr>";
+                }
+                echo "</table>";
+            } else {
+                echo "0 results";
             }
-            echo "</table>";
-        } else {
-            echo "0 results";
-        }
-        ?>
+            ?>
         </tbody>
      
     </table>
-
+            <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Image Preview</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="image-preview" name ="image-preview" src="" alt="image" width="100%" height="500px"></iframe>
+              
+                </div>
+            </div>
+        </div>
+    </div>
         <!-- Check file size Modal -->
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -286,6 +306,14 @@
         </div>
    
 </body>
+<script>
+            $('#exampleModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var imgSrc = button.data('img') // Extract info from data-* attributes
+            var modalImg = $('#image-preview')
+            modalImg.attr('src', imgSrc);
+            });
+        </script>
 <?php
 function generateCertCode() {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
